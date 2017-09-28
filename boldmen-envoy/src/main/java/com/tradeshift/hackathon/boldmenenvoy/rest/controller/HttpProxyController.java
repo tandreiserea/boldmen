@@ -37,14 +37,70 @@ public class HttpProxyController {
 	public @ResponseBody String mirrorRest(HttpMethod method, HttpServletRequest request,
 			HttpServletResponse response) throws URISyntaxException {
 
+		/*
 		String cachedResult=cachedResults.get(request.getRequestURI());
 		
 		if (cachedResult!=null)
 			return cachedResult;
+		*/
+		/*
+		respond: true/false
+		delay: integer (seconds)
+		errorCode: http_error_code
+		*/
 		
+		String useCache=System.getenv("useCache");
+
+		if (useCache==null)
+			useCache="false";
+		
+		String respondValue=settings.get("respond");
+		String delayValue=settings.get("delay");
+		String errorCode=settings.get("errorCode");
+		
+		if (respondValue!=null)
+			if (respondValue.equals("false"))
+			{
+				try
+				{
+					Thread.sleep(1000000000);
+				}
+				catch (Exception e) 
+				{
+					
+				}
+				return "";
+			}
+		
+		if (delayValue!=null)
+		{
+			try
+			{
+				int nSleep=(new Integer(delayValue)).intValue();
+				Thread.sleep(nSleep);
+			}
+			catch (Exception e) {
+				
+			}
+		}
+		
+		if (errorCode!=null)
+		{
+			try
+			{
+				int nCode=(new Integer(errorCode)).intValue();
+				response.setStatus(nCode);
+			}
+			catch (Exception e) {
+				
+			}
+			
+		}
 		String responseBody = client.get(request.getRequestURI());
 		
-		cachedResults.put(request.getRequestURI(), responseBody);
+		if (useCache.equals("true"))
+			cachedResults.put(request.getRequestURI(), responseBody);
+		
 		return responseBody;
 	}
 	
