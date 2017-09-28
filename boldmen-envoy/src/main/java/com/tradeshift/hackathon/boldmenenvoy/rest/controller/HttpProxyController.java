@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,5 +52,29 @@ public class HttpProxyController {
         LOGGER.info("delegate to others", DelegateController.class);
     	return "redirect:" + "http://www.google.com";
     }
+	
+	@RequestMapping(value = "/settings", method = RequestMethod.PUT)
+	public void delegate(@RequestParam(value = "key", required = true) String key,
+			@RequestParam(value = "value", required = true) String value, HttpServletResponse response)
+			throws ParseException, InterruptedException {
+
+		switch (key) {
+		case "respond":
+
+			if ("false".equals(value)) {
+				response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+			} 
+
+			break;
+
+		case "delay":
+			Thread.sleep(Integer.valueOf(value)*1000);
+			break;
+
+		case "errorCode":
+			response.setStatus(Integer.valueOf(value));
+		}
+
+	}
 	
 }
