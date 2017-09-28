@@ -11,16 +11,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tradeshift.hackathon.boldmenenvoy.controllers.DelegateController;
 import com.tradeshift.hackathon.boldmenenvoy.rest.RestClient;
 
 @RestController
@@ -35,7 +36,7 @@ public class HttpProxyController {
 	static Map<String,String> settings = new HashMap<String,String>();
 	
 	@RequestMapping(value="/**",method = RequestMethod.GET)
-	public @ResponseBody String mirrorRest(HttpMethod method, HttpServletRequest request,
+	public @ResponseBody String mirrorRest(HttpMethod method, @RequestHeader HttpHeaders headers, HttpServletRequest request,
 			HttpServletResponse response) throws URISyntaxException {
 
 		/*
@@ -97,7 +98,7 @@ public class HttpProxyController {
 			}
 			
 		}
-		ResponseEntity<String> proxyResponse=client.get(request.getRequestURI());
+		ResponseEntity<String> proxyResponse=client.get(request.getRequestURI(),headers);
 		String responseBody = proxyResponse.getBody();
 		
 		HttpStatus statusCode = proxyResponse.getStatusCode();
@@ -117,18 +118,12 @@ public class HttpProxyController {
 				}
 			}
 		}
-		
+
 		if (useCache.equals("true"))
 			cachedResults.put(request.getRequestURI(), responseBody);
 		
 		return responseBody;
 	}
-	
-	@RequestMapping(value = "/delegate", method = RequestMethod.GET)
-    public String delegate(@RequestParam(value = "dest", required = true) String dest) throws ParseException {
-        LOGGER.info("delegate to others", DelegateController.class);
-    	return "redirect:" + "http://www.google.com";
-    }
 	
 	@RequestMapping(value = "/settings", method = RequestMethod.PUT)
 	public void delegate(@RequestParam(value = "key", required = true) String key,
