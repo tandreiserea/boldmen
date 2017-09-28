@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,7 +77,7 @@ public class HttpProxyController {
 		{
 			try
 			{
-				int nSleep=(new Integer(delayValue)).intValue();
+				int nSleep=(new Integer(delayValue)).intValue()*1000;
 				Thread.sleep(nSleep);
 			}
 			catch (Exception e) {
@@ -96,7 +97,26 @@ public class HttpProxyController {
 			}
 			
 		}
-		String responseBody = client.get(request.getRequestURI());
+		ResponseEntity<String> proxyResponse=client.get(request.getRequestURI());
+		String responseBody = proxyResponse.getBody();
+		
+		HttpStatus statusCode = proxyResponse.getStatusCode();
+		
+		if (statusCode.is5xxServerError())
+		{
+			if (useCache.equals("true"))
+			{
+				String cachedResult=cachedResults.get(request.getRequestURI());
+			
+				if (cachedResult!=null)
+					return cachedResult;
+				else
+				{
+					response.setStatus(504);
+					return "Gateway Timeout";
+				}
+			}
+		}
 		
 		if (useCache.equals("true"))
 			cachedResults.put(request.getRequestURI(), responseBody);

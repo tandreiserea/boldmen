@@ -26,11 +26,11 @@ public class RestClient {
     headers.add("Accept", "*/*");
   }
 
-  public String get(String uri) {
+  public ResponseEntity<String> get(String uri) {
     HttpEntity<String> requestEntity = new HttpEntity<String>("", headers);
     ResponseEntity<String> responseEntity = rest.exchange(server + uri, HttpMethod.GET, requestEntity, String.class);
     this.setStatus(responseEntity.getStatusCode());
-    return responseEntity.getBody();
+    return responseEntity;
   }
 
   public String post(String uri, String json) {   
