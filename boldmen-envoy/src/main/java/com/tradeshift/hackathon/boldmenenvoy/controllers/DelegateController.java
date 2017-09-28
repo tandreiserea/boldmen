@@ -22,6 +22,7 @@ public class DelegateController {
 
 	static Logger LOGGER = LoggerFactory.getLogger(DelegateController.class);
 
+	/*
 	
 	@RequestMapping(value = "/**")
 	@ResponseBody
@@ -36,4 +37,5 @@ public class DelegateController {
     	return "redirect:" + "http://www.google.com";
     }
 
+	*/
 }
