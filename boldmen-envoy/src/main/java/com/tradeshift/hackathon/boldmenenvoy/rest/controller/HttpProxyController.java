@@ -31,6 +31,7 @@ public class HttpProxyController {
 	RestClient client;
 
 	static Map<String,String> cachedResults = new HashMap<String,String>();
+	static Map<String,String> settings = new HashMap<String,String>();
 	
 	@RequestMapping(value="/**",method = RequestMethod.GET)
 	public @ResponseBody String mirrorRest(HttpMethod method, HttpServletRequest request,
@@ -58,23 +59,7 @@ public class HttpProxyController {
 			@RequestParam(value = "value", required = true) String value, HttpServletResponse response)
 			throws ParseException, InterruptedException {
 
-		switch (key) {
-		case "respond":
-
-			if ("false".equals(value)) {
-				response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
-			} 
-
-			break;
-
-		case "delay":
-			Thread.sleep(Integer.valueOf(value)*1000);
-			break;
-
-		case "errorCode":
-			response.setStatus(Integer.valueOf(value));
-		}
-
+		settings.put(key, value);
 	}
 	
 }
