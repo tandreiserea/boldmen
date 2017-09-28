@@ -56,7 +56,7 @@ public class HttpProxyController {
 	
 	@RequestMapping(value = "/settings", method = RequestMethod.PUT)
 	public void delegate(@RequestParam(value = "key", required = true) String key,
-			@RequestParam(value = "value", required = true) String value, HttpServletResponse response)
+			@RequestParam(value = "value", required = true) String value)
 			throws ParseException, InterruptedException {
 
 		settings.put(key, value);
