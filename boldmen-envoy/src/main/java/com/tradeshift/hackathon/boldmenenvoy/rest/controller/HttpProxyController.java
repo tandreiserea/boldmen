@@ -39,6 +39,8 @@ public class HttpProxyController {
 	public @ResponseBody String mirrorRest(HttpMethod method, @RequestHeader HttpHeaders headers, HttpServletRequest request,
 			HttpServletResponse response) throws URISyntaxException {
 
+	    System.out.println("Received request to: " + request.getRequestURI());
+
 		/*
 		String cachedResult=cachedResults.get(request.getRequestURI());
 		
@@ -102,7 +104,14 @@ public class HttpProxyController {
 		String responseBody = proxyResponse.getBody();
 		
 		HttpStatus statusCode = proxyResponse.getStatusCode();
-		
+		//copy headers to response
+//		for(String header : proxyResponse.getHeaders().keySet()) {
+//			for(String headerValue : proxyResponse.getHeaders().get(header)) {
+//				response.addHeader(header, headerValue);
+//				System.out.println(header + ":" + headerValue);
+//			}
+//		}
+        System.out.println("sutpi");
 		if (statusCode.is5xxServerError())
 		{
 			if (useCache.equals("true"))
