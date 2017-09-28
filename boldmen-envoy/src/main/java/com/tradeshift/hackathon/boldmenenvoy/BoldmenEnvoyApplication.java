@@ -8,7 +8,6 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @EnableAutoConfiguration
 @ComponentScan("com.tradeshift.hackathon.boldmenenvoy")
-
 public class BoldmenEnvoyApplication {
 
 	public static void main(String[] args) {
