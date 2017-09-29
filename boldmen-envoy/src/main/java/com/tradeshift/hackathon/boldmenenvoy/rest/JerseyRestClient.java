@@ -40,7 +40,7 @@ public class JerseyRestClient {
     }
 
     public Response fwGet(HttpServletRequest request) {
-        Invocation.Builder fwrequest = httpClient.target(System.getenv().get("UPSTREAM_URL") + request.getRequestURI()).request();
+        Invocation.Builder fwrequest = httpClient.target(this.server + request.getRequestURI()).request();
         //copy headers to fwrequest
         Enumeration<String> headerNames = request.getHeaderNames();
         while(headerNames.hasMoreElements()) {
