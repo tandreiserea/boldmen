@@ -1,2 +1,2 @@
 #!/bin/sh
-docker build -f dockerfile-envoy -t boldmen/boldmen-envoy:latest .
+docker build -f Dockerfile-boldmen-envoy -t boldmen/boldmen-envoy:latest .

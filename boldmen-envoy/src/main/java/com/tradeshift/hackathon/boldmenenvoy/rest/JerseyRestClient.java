@@ -59,9 +59,11 @@ public class JerseyRestClient {
         Response response = fwrequest.get();
         // cache good responses
         if (this.useCache) {
+        	System.out.println("response status: " + response.getStatus());
             if (response.getStatus() < 500) {
                 cachedResults.put(request.getRequestURI(), response);
             } else {
+            	System.out.println("returning from cache for url " + request.getRequestURI());
                 Response cachedResponse = cachedResults.get(request.getRequestURI());
                 return cachedResponse != null ? cachedResponse : response;
             }
@@ -70,7 +72,35 @@ public class JerseyRestClient {
         return response;
     }
 
-    public Boolean getRespond() {
+    public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
+	public Boolean getUseCache() {
+		return useCache;
+	}
+
+	public void setUseCache(Boolean useCache) {
+		this.useCache = useCache;
+	}
+
+	public String getEnvoyURL() {
+		return envoyURL;
+	}
+
+	public void setEnvoyURL(String envoyURL) {
+		this.envoyURL = envoyURL;
+	}
+
+	public Map<String, Response> getCachedResults() {
+		return cachedResults;
+	}
+
+	public Boolean getRespond() {
         return respond;
     }
 

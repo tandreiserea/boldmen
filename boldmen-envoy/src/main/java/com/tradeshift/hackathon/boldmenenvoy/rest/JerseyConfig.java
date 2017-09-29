@@ -13,5 +13,6 @@ public class JerseyConfig extends ResourceConfig {
     public JerseyConfig() {
         // scan the resources package for our resources
         register(HttpProxyController.class);
+        register(SettingsService.class);
     }
 }
