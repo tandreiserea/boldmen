@@ -38,7 +38,7 @@ public class JerseyRestClient {
         this.useCache = Boolean.valueOf(System.getProperty("useCache", "true"));
         this.cachedResults = new ConcurrentHashMap<>();
         this.respond = true;
-        this.envoy = true;
+        this.envoy = Boolean.valueOf(System.getProperty("envoy", "false"));
         this.delay = 0;
         this.errorCode = 0;
     }
