@@ -82,7 +82,7 @@ public class SettingsService {
     	b.append("envoyURL = ").append(settings.getEnvoyURL()).append("\n");
     	b.append("useCache = ").append(settings.getUseCache()).append("\n");
     	b.append("cachedResults = ").append("\n").append("[");
-    	for(Entry<String,Response> entry: settings.getCachedResults().entrySet())
+    	for(Entry<String,BResponse> entry: settings.getCachedResults().entrySet())
     	{
     		b.append(entry.getKey()).append("= ").append(entry.getValue().toString()).append("\n");
     	}

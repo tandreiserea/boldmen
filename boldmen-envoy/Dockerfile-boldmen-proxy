@@ -19,8 +19,8 @@ RUN apt-get update
 WORKDIR /deployments
 
 COPY target/boldmen-envoy-0.0.1-SNAPSHOT.jar .
-COPY entrypoint-proxy.sh entrypoint.sh
+COPY entrypoint-proxy.sh .
 
-RUN chmod +x entrypoint.sh
+RUN chmod +x entrypoint-proxy.sh
 
-ENTRYPOINT [ "./entrypoint.sh" ]
+ENTRYPOINT [ "./entrypoint-proxy.sh" ]

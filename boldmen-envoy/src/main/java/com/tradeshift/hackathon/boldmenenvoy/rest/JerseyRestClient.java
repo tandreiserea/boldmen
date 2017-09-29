@@ -66,11 +66,25 @@ public class JerseyRestClient {
         if (this.useCache) {
         	System.out.println("response status: " + response.getStatus());
             if (response.getStatus() < 500) {
-                InputStream inputStream = response.readEntity(InputStream.class);
-                byte[] bytes = StreamUtils.copyToByteArray(inputStream);
-                MultivaluedMap<String, Object> headers = response.getHeaders();
-                cachedResults.put(request.getRequestURI(), new BResponse(bytes, response.getHeaders(), response.getStatus()));
-                inputStream.close();
+				InputStream inputStream = response.readEntity(InputStream.class);
+				byte[] bytes = StreamUtils.copyToByteArray(inputStream);
+				MultivaluedMap<String, Object> headers = response.getHeaders();
+				BResponse br = new BResponse(bytes, headers, response.getStatus());
+				cachedResults.put(request.getRequestURI(), br);
+				inputStream.close();
+
+				System.out.println("cloning fw response that was cached " + request.getRequestURI());
+
+				Response clonedResponse;
+				clonedResponse = Response.status(br.status).entity(br.response).build();
+
+				for (Map.Entry<String, List<Object>> entry : br.headers.entrySet()) {
+					for (Object value : entry.getValue()) {
+						clonedResponse.getHeaders().add(entry.getKey(), value);
+					}
+				}
+				return clonedResponse;
+                
             } else if (cachedResults.containsKey(request.getRequestURI())) {
             	System.out.println("returning from cache for url " + request.getRequestURI());
 
@@ -79,7 +93,10 @@ public class JerseyRestClient {
                 cachedResponse = Response.status(bresponse.status).entity(bresponse.response).build();
 
                 for (Map.Entry<String, List<Object>> entry : bresponse.headers.entrySet()) {
-                    cachedResponse.getHeaders().add(entry.getKey(), entry.getValue());
+                	for(Object value: entry.getValue())
+                	{
+                		cachedResponse.getHeaders().add(entry.getKey(),value);
+                	}
                 }
                 return cachedResponse;
             }
@@ -112,7 +129,7 @@ public class JerseyRestClient {
 		this.envoyURL = envoyURL;
 	}
 
-	public Map<String, Response> getCachedResults() {
+	public Map<String, BResponse> getCachedResults() {
 		return cachedResults;
 	}
 

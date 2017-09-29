@@ -1,5 +1,6 @@
 package com.tradeshift.hackathon.boldmenenvoy.rest.controller;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +30,7 @@ public class HttpProxyController {
     @Context HttpServletRequest request;
 
 	@GET
-	public Response mirrorRest(@Context HttpServletResponse httpServletResponse) throws URISyntaxException {
+	public Response mirrorRest(@Context HttpServletResponse httpServletResponse) throws URISyntaxException, IOException {
 
 	    System.out.println("Received request to: " + request.getRequestURI());
         Response.ResponseBuilder responseBuilder;
