@@ -2,14 +2,19 @@ package com.tradeshift.hackathon.boldmenenvoy.rest;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +27,7 @@ public class JerseyRestClient {
 
     private String server;
     private Client httpClient;
-    private Map<String,Response> cachedResults;
+    private Map<String,BResponse> cachedResults;
     private Boolean useCache;
     private Boolean respond;
     private Integer delay;
@@ -43,7 +48,7 @@ public class JerseyRestClient {
         this.errorCode = 0;
     }
 
-    public Response fwGet(HttpServletRequest request) {
+    public Response fwGet(HttpServletRequest request) throws IOException {
         Invocation.Builder fwrequest = httpClient.target((this.envoy ? this.envoyURL : this.server) + request.getRequestURI()).request();
         //copy headers to fwrequest
         Enumeration<String> headerNames = request.getHeaderNames();
@@ -61,11 +66,22 @@ public class JerseyRestClient {
         if (this.useCache) {
         	System.out.println("response status: " + response.getStatus());
             if (response.getStatus() < 500) {
-                cachedResults.put(request.getRequestURI(), response);
-            } else {
+                InputStream inputStream = response.readEntity(InputStream.class);
+                byte[] bytes = StreamUtils.copyToByteArray(inputStream);
+                MultivaluedMap<String, Object> headers = response.getHeaders();
+                cachedResults.put(request.getRequestURI(), new BResponse(bytes, response.getHeaders(), response.getStatus()));
+                inputStream.close();
+            } else if (cachedResults.containsKey(request.getRequestURI())) {
             	System.out.println("returning from cache for url " + request.getRequestURI());
-                Response cachedResponse = cachedResults.get(request.getRequestURI());
-                return cachedResponse != null ? cachedResponse : response;
+
+                Response cachedResponse;
+                BResponse bresponse = cachedResults.get(request.getRequestURI());
+                cachedResponse = Response.status(bresponse.status).entity(bresponse.response).build();
+
+                for (Map.Entry<String, List<Object>> entry : bresponse.headers.entrySet()) {
+                    cachedResponse.getHeaders().add(entry.getKey(), entry.getValue());
+                }
+                return cachedResponse;
             }
         }
 
