@@ -27,20 +27,24 @@ public class JerseyRestClient {
     private Boolean respond;
     private Integer delay;
     private Integer errorCode;
+    private Boolean envoy;
+    private String envoyURL;
 
     @PostConstruct
     public void init() {
         this.server = System.getProperty("UPSTREAM_URL");
+        this.envoyURL = System.getProperty("UPSTREAM_URL_ENVOY");
         this.httpClient = ClientBuilder.newClient();
         this.useCache = Boolean.valueOf(System.getProperty("useCache", "true"));
         this.cachedResults = new ConcurrentHashMap<>();
         this.respond = true;
+        this.envoy = true;
         this.delay = 0;
         this.errorCode = 0;
     }
 
     public Response fwGet(HttpServletRequest request) {
-        Invocation.Builder fwrequest = httpClient.target(this.server + request.getRequestURI()).request();
+        Invocation.Builder fwrequest = httpClient.target((this.envoy ? this.envoyURL : this.server) + request.getRequestURI()).request();
         //copy headers to fwrequest
         Enumeration<String> headerNames = request.getHeaderNames();
         while(headerNames.hasMoreElements()) {
@@ -88,5 +92,13 @@ public class JerseyRestClient {
 
     public void setErrorCode(Integer errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public Boolean getEnvoy() {
+        return envoy;
+    }
+
+    public void setEnvoy(Boolean envoy) {
+        this.envoy = envoy;
     }
 }

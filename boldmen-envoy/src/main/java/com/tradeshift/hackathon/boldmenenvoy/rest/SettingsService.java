@@ -28,6 +28,8 @@ public class SettingsService {
             case "errorCode":
                 settings.setErrorCode(Integer.valueOf(settingValue));
                 return true;
+            case "envoy":
+                settings.setEnvoy(Boolean.valueOf(settingValue));
         }
         return false;
     }
