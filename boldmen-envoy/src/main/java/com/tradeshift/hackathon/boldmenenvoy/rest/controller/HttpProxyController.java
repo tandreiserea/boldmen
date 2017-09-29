@@ -1,46 +1,34 @@
 package com.tradeshift.hackathon.boldmenenvoy.rest.controller;
 
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
+import com.tradeshift.hackathon.boldmenenvoy.rest.JerseyRestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
-import com.tradeshift.hackathon.boldmenenvoy.rest.RestClient;
-
-@RestController
+@Path("/{any : .*}")
 public class HttpProxyController {
 
 	static Logger LOGGER = LoggerFactory.getLogger(HttpProxyController.class);
 
 	@Autowired
-	RestClient client;
+    private JerseyRestClient client;
 
-	static Map<String,String> cachedResults = new HashMap<String,String>();
-	static Map<String,String> settings = new HashMap<String,String>();
-	
-	@RequestMapping(value="/**",method = RequestMethod.GET)
-	public @ResponseBody String mirrorRest(HttpMethod method, @RequestHeader HttpHeaders headers, HttpServletRequest request,
-			HttpServletResponse response) throws URISyntaxException {
+    @Context HttpServletRequest request;
+
+	@GET
+	public Response mirrorRest(@Context HttpServletResponse httpServletResponse) throws URISyntaxException {
 
 	    System.out.println("Received request to: " + request.getRequestURI());
-
+        Response.ResponseBuilder responseBuilder;
 		/*
 		String cachedResult=cachedResults.get(request.getRequestURI());
 		
@@ -53,93 +41,30 @@ public class HttpProxyController {
 		errorCode: http_error_code
 		*/
 		
-		String useCache=System.getenv("useCache");
+		if (!client.getRespond()) {
+            return Response.status(503).build();
+        }
 
-		if (useCache==null)
-			useCache="false";
-		
-		String respondValue=settings.get("respond");
-		String delayValue=settings.get("delay");
-		String errorCode=settings.get("errorCode");
-		
-		if (respondValue!=null)
-			if (respondValue.equals("false"))
-			{
-				try
-				{
-					Thread.sleep(1000000000);
-				}
-				catch (Exception e) 
-				{
-					
-				}
-				return "";
-			}
-		
-		if (delayValue!=null)
-		{
-			try
-			{
-				int nSleep=(new Integer(delayValue)).intValue()*1000;
-				Thread.sleep(nSleep);
-			}
-			catch (Exception e) {
-				
-			}
-		}
-		
-		if (errorCode!=null)
-		{
-			try
-			{
-				int nCode=(new Integer(errorCode)).intValue();
-				response.setStatus(nCode);
-			}
-			catch (Exception e) {
-				
-			}
-			
-		}
-		ResponseEntity<String> proxyResponse=client.get(request.getRequestURI(),headers);
-		String responseBody = proxyResponse.getBody();
-		
-		HttpStatus statusCode = proxyResponse.getStatusCode();
-		//copy headers to response
-//		for(String header : proxyResponse.getHeaders().keySet()) {
-//			for(String headerValue : proxyResponse.getHeaders().get(header)) {
-//				response.addHeader(header, headerValue);
-//				System.out.println(header + ":" + headerValue);
+        try
+        {
+            int nSleep=client.getDelay()*1000;
+            Thread.sleep(nSleep);
+        }
+        catch (Exception e) {}
+
+//		if (errorCode!=null)
+//		{
+//			try
+//			{
+//				int nCode=(new Integer(errorCode)).intValue();
+//				responseBuilder = Response.status(nCode);
+////				response.setStatus(nCode);
 //			}
+//			catch (Exception e) {
+//
+//			}
+//
 //		}
-        System.out.println("sutpi");
-		if (statusCode.is5xxServerError())
-		{
-			if (useCache.equals("true"))
-			{
-				String cachedResult=cachedResults.get(request.getRequestURI());
-			
-				if (cachedResult!=null)
-					return cachedResult;
-				else
-				{
-					response.setStatus(504);
-					return "Gateway Timeout";
-				}
-			}
-		}
-
-		if (useCache.equals("true"))
-			cachedResults.put(request.getRequestURI(), responseBody);
-		
-		return responseBody;
+        return client.fwGet(this.request);
 	}
-	
-	@RequestMapping(value = "/settings", method = RequestMethod.PUT)
-	public void delegate(@RequestParam(value = "key", required = true) String key,
-			@RequestParam(value = "value", required = true) String value)
-			throws ParseException, InterruptedException {
-
-		settings.put(key, value);
-	}
-	
 }
