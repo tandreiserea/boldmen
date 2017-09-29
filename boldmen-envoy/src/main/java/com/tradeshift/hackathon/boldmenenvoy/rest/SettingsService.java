@@ -37,6 +37,10 @@ public class SettingsService {
                 return true;
             case "envoy":
                 settings.setEnvoy(Boolean.valueOf(settingValue));
+                return true;
+            case "useCache":
+                settings.setUseCache(Boolean.valueOf(settingValue));
+                return true;
                 
         }
         return false;
