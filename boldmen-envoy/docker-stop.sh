@@ -1,2 +1,4 @@
 #!/bin/sh
-docker rm --force client
+docker rm --force boldmen-envoy
+docker rm --force boldmen-client
+docker rm --force boldmen-proxy
